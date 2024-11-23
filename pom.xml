@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>se.akjeller</groupId>
+    <groupId>se.kjeller</groupId>
     <artifactId>advent-of-code</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -25,9 +25,8 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
-            <version>3.6.1</version> <!-- Use the latest version available -->
+            <version>3.6.1</version>
         </dependency>
-
     </dependencies>
 
 </project>
