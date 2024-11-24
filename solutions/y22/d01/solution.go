@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"sort"
-	"strconv"
 
 	util "github.com/aKjeller/advent-of-code/utilities/go"
 )
@@ -11,39 +10,34 @@ import (
 const YEAR = "22"
 const DAY = "01"
 
-func part1(input []string) {
+func part1(path string) {
+	input := util.ToIntSlice(path)
+
 	t := 0
 	c := 0
-	for _, e := range input {
-		if e == "" {
+	for _, v := range input {
+		if v == nil {
 			t = max(t, c)
 			c = 0
 		} else {
-			v, err := strconv.Atoi(e)
-			if err != nil {
-				panic(err)
-			}
-			c += v
+			c += *v
 		}
 	}
 
 	fmt.Println("part1: ", t)
 }
 
-func part2(input []string) {
-	var elfs []int
+func part2(path string) {
+	input := util.ToIntSlice(path)
 
+	var elfs []int
 	c := 0
-	for _, e := range input {
-		if e == "" {
+	for _, v := range input {
+		if v == nil {
 			elfs = append(elfs, c)
 			c = 0
 		} else {
-			v, err := strconv.Atoi(e)
-			if err != nil {
-				panic(err)
-			}
-			c += v
+			c += *v
 		}
 	}
 
@@ -53,9 +47,8 @@ func part2(input []string) {
 }
 
 func main() {
-	part1(util.ToStringSlice(util.ExamplePath(YEAR, DAY)))
-	part1(util.ToStringSlice(util.InputPath(YEAR, DAY)))
-
-	part2(util.ToStringSlice(util.ExamplePath(YEAR, DAY)))
-	part2(util.ToStringSlice(util.InputPath(YEAR, DAY)))
+	part1(util.ExamplePath(YEAR, DAY))
+	part1(util.InputPath(YEAR, DAY))
+	part2(util.ExamplePath(YEAR, DAY))
+	part2(util.InputPath(YEAR, DAY))
 }

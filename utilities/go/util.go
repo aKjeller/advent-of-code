@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 )
 
 func InputPath(year, day string) string {
@@ -14,11 +15,30 @@ func ExamplePath(year, day string) string {
 	return fmt.Sprintf("solutions/y%s/d%s/example.txt", year, day)
 }
 
+func ToIntSlice(path string) []*int {
+	lines := ToStringSlice(path)
+
+	var nums []*int
+	for _, s := range lines {
+		if s == "" {
+			nums = append(nums, nil)
+		} else {
+			i, err := strconv.Atoi(s)
+			if err != nil {
+				panic(err)
+			}
+			nums = append(nums, &i)
+		}
+	}
+	return nums
+}
+
 func ToStringSlice(path string) []string {
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
 	}
+	defer file.Close()
 
 	var s []string
 	scanner := bufio.NewScanner(file)
@@ -26,14 +46,9 @@ func ToStringSlice(path string) []string {
 		s = append(s, scanner.Text())
 	}
 
-	return s
-}
-
-func ToString(path string) string {
-	b, err := os.ReadFile(path)
-	if err != nil {
+	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
 
-	return string(b)
+	return s
 }
