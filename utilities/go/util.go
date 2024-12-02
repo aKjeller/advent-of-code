@@ -58,7 +58,6 @@ func ToStringSlice(path string) []string {
 	if err != nil {
 		panic(err)
 	}
-	defer file.Close()
 
 	var s []string
 	scanner := bufio.NewScanner(file)
@@ -81,9 +80,17 @@ func ParseInt(s string) int {
 	return int(i)
 }
 
+// Abs returns the absolute value of i.
 func Abs(i int) int {
 	if i < 0 {
 		return -i
 	}
 	return i
+}
+
+// RemoveElement returns a new slice without the element at index i.
+func RemoveElement[T any](src []T, i int) []T {
+	output := make([]T, 0)
+	output = append(output, src[:i]...)
+	return append(output, src[i+1:]...)
 }
