@@ -72,6 +72,14 @@ func ToStringSlice(path string) []string {
 	return s
 }
 
+func ToString(path string) string {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
+}
+
 func ParseInt(s string) int {
 	i, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
