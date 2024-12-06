@@ -102,3 +102,12 @@ func RemoveElement[T any](src []T, i int) []T {
 	output = append(output, src[:i]...)
 	return append(output, src[i+1:]...)
 }
+
+func DeepCopy[T any](src [][]T) [][]T {
+	dst := make([][]T, len(src))
+	for i := range src {
+		dst[i] = make([]T, len(src[i]))
+		copy(dst[i], src[i])
+	}
+	return dst
+}
