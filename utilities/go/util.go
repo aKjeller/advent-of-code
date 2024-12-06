@@ -103,6 +103,7 @@ func RemoveElement[T any](src []T, i int) []T {
 	return append(output, src[i+1:]...)
 }
 
+// DeepCopy returns a deep copy of a 2d-slice
 func DeepCopy[T any](src [][]T) [][]T {
 	dst := make([][]T, len(src))
 	for i := range src {
