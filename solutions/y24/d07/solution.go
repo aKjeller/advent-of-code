@@ -18,56 +18,45 @@ func part2(path string) {
 	fmt.Printf("part2: %d\n", score)
 }
 
-func solve(input []string, types []uint8) int {
+func solve(input []string, ops []uint8) int {
 	score := 0
 	for _, row := range input {
 		nums := util.GetIntsFromString(row)
-
-		total := nums[0]
-		nums = nums[1:]
-
-		var ops []string
-		permute(types, len(nums)-1, "", &ops)
-		for _, op := range ops {
-			sum := calc(op, nums, total)
-			if sum == total {
-				score += total
-				break
-			}
+		if permuteWrap(nums[1:], ops, nums[0]) {
+			score += nums[0]
 		}
 	}
 	return score
 }
 
-func calc(ops string, nums []int, max int) int {
-	t := nums[0]
-	for i, _ := range ops {
-		if ops[i] == '+' {
-			t += nums[i+1]
-		} else if ops[i] == '*' {
-			t *= nums[i+1]
-		} else {
-			// int -> string -> int = 3.0s
-			//t = util.ParseInt(fmt.Sprintf("%d%d", t, nums[i+1]))
-
-			// concatenate = 1.1s
-			t = util.Concatenate(t, nums[i+1])
-		}
-		if t > max {
-			return t
-		}
-	}
-	return t
+func permuteWrap(nums []int, ops []uint8, ans int) bool {
+	return permute(nums, ops, ans, -1, 0, 0)
 }
 
-func permute(types []uint8, i int, op string, ops *[]string) {
-	if i == 0 {
-		*ops = append(*ops, op)
-		return
+func permute(nums []int, ops []uint8, ans, i int, op uint8, count int) bool {
+	if i == len(nums) {
+		return count == ans
 	}
-	for _, t := range types {
-		permute(types, i-1, op+string(t), ops)
+
+	if count > ans {
+		return false
 	}
+
+	if op == '+' {
+		count += nums[i]
+	} else if op == '*' {
+		count *= nums[i]
+	} else if op == '|' {
+		count = util.Concatenate(count, nums[i])
+	}
+
+	for _, o := range ops {
+		if permute(nums, ops, ans, i+1, o, count) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func main() {
