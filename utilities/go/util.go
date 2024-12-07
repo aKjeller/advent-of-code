@@ -112,3 +112,12 @@ func DeepCopy[T any](src [][]T) [][]T {
 	}
 	return dst
 }
+
+// Concatenate concatenates two integers, 1337 + 1337 = 13371337
+func Concatenate(a, b int) int {
+	mul := 1
+	for tmp := b; tmp > 0; tmp /= 10 {
+		mul *= 10
+	}
+	return a*mul + b
+}
