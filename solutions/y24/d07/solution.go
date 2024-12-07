@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	util "github.com/aKjeller/advent-of-code/utilities/go"
+	"sync"
 )
 
 const YEAR = "24"
@@ -19,13 +20,29 @@ func part2(path string) {
 }
 
 func solve(input []string, ops []uint8) int {
-	score := 0
+	wg := sync.WaitGroup{}
+	ch := make(chan int)
 	for _, row := range input {
-		nums := util.GetIntsFromString(row)
-		if permuteWrap(nums[1:], ops, nums[0]) {
-			score += nums[0]
-		}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			nums := util.GetIntsFromString(row)
+			if permuteWrap(nums[1:], ops, nums[0]) {
+				ch <- nums[0]
+			}
+		}()
 	}
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	score := 0
+	for s := range ch {
+		score += s
+	}
+
 	return score
 }
 
