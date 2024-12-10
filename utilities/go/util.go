@@ -72,6 +72,18 @@ func ToStringSlice(path string) []string {
 	return s
 }
 
+func ToGrid(path string) (m [][]uint8) {
+	input := ToStringSlice(path)
+	for i := 0; i < len(input); i++ {
+		var row []uint8
+		for j := 0; j < len(input[i]); j++ {
+			row = append(row, input[i][j])
+		}
+		m = append(m, row)
+	}
+	return m
+}
+
 func ToString(path string) string {
 	b, err := os.ReadFile(path)
 	if err != nil {

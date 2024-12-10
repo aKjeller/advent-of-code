@@ -9,16 +9,7 @@ const YEAR = "24"
 const DAY = "04"
 
 func part1(path string) {
-	input := util.ToStringSlice(path)
-
-	var data [][]uint8
-	for i := 0; i < len(input); i++ {
-		var row []uint8
-		for j := 0; j < len(input[i]); j++ {
-			row = append(row, input[i][j])
-		}
-		data = append(data, row)
-	}
+	data := util.ToGrid(path)
 
 	score := 0
 	for i := 0; i < len(data); i++ {
@@ -100,16 +91,7 @@ func valid(input [][]uint8, c uint8, i, j int) bool {
 }
 
 func part2(path string) {
-	input := util.ToStringSlice(path)
-
-	var data [][]uint8
-	for i := 0; i < len(input); i++ {
-		var row []uint8
-		for j := 0; j < len(input[i]); j++ {
-			row = append(row, input[i][j])
-		}
-		data = append(data, row)
-	}
+	data := util.ToGrid(path)
 
 	score := 0
 	for i := 0; i < len(data); i++ {
