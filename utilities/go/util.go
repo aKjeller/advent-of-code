@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
+	"strings"
 	"unicode"
 )
 
@@ -36,6 +38,24 @@ func GetIntsFromString(s string) []int {
 	}
 
 	return nums
+}
+
+func GetIntsFromStringWithNegative(s string) []int {
+	r := regexp.MustCompile(`-?\d+`)
+	var nums []int
+	for _, match := range r.FindAllString(s, -1) {
+		nums = append(nums, ParseInt(match))
+	}
+	return nums
+}
+
+func GetFloatsFromString(s string) []float64 {
+	var floats []float64
+	ints := GetIntsFromString(s)
+	for _, i := range ints {
+		floats = append(floats, float64(i))
+	}
+	return floats
 }
 
 func ToIntSlice(path string) []*int {
@@ -89,12 +109,13 @@ func ToString(path string) string {
 	if err != nil {
 		panic(err)
 	}
-	return string(b)
+	return strings.Replace(string(b), "\r\n", "\n", -1)
 }
 
 func ParseInt(s string) int {
 	i, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 	return int(i)
@@ -132,4 +153,12 @@ func Concatenate(a, b int) int {
 		mul *= 10
 	}
 	return a*mul + b
+}
+
+// Gcd calculates gcd
+func Gcd(a, b int) int {
+	if b == 0 {
+		return a
+	}
+	return Gcd(b, a%b)
 }
