@@ -1,6 +1,8 @@
 package main
 
 import (
+	"container/heap"
+	"github.com/aKjeller/advent-of-code/utilities/go/ds"
 	"math"
 )
 
@@ -32,17 +34,17 @@ func dijkstra(graph map[vertex][]edge, start, end vertex) (int, int) {
 	for v := range graph {
 		dist[v] = math.MaxInt
 	}
+	dist[start] = 0
 
-	unvisited := make(map[vertex]bool)
+	unvisited := &ds.PriorityQueue[vertex]{}
+	heap.Init(unvisited)
+	heap.Push(unvisited, ds.Item[vertex]{Value: start, Priority: 0})
+
 	visited := make(map[vertex]bool)
 	previous := make(map[vertex][]vertex)
 
-	dist[start] = 0
-	unvisited[start] = true
-
-	for len(unvisited) > 0 {
-		current := getLowestCost(unvisited, dist)
-		delete(unvisited, current)
+	for unvisited.Len() > 0 {
+		current := heap.Pop(unvisited).(ds.Item[vertex]).Value
 
 		if current.x == end.x && current.y == end.y {
 			unique := make(map[[2]int]bool)
@@ -62,7 +64,7 @@ func dijkstra(graph map[vertex][]edge, start, end vertex) (int, int) {
 			newDist := dist[current] + e.cost
 			if newDist < dist[e.end] {
 				dist[e.end] = newDist
-				unvisited[e.end] = true
+				heap.Push(unvisited, ds.Item[vertex]{Value: e.end, Priority: newDist})
 				previous[e.end] = []vertex{current}
 			} else if newDist == dist[e.end] {
 				previous[e.end] = append(previous[e.end], current)
@@ -70,17 +72,6 @@ func dijkstra(graph map[vertex][]edge, start, end vertex) (int, int) {
 		}
 	}
 	return -1, -1
-}
-
-func getLowestCost(m map[vertex]bool, dist map[vertex]int) vertex {
-	var lowest vertex
-	lowestDistance := math.MaxInt
-	for v := range m {
-		if dist[v] < lowestDistance {
-			lowest, lowestDistance = v, dist[v]
-		}
-	}
-	return lowest
 }
 
 func getUniqueVertices(current vertex, prev map[vertex][]vertex, unique map[[2]int]bool) {
