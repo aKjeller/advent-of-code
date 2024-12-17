@@ -162,3 +162,16 @@ func Gcd(a, b int) int {
 	}
 	return Gcd(b, a%b)
 }
+
+// CompareSlices returns true if the slices are equal
+func CompareSlices[T comparable](a, b []T) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
