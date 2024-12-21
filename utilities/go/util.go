@@ -175,3 +175,19 @@ func CompareSlices[T comparable](a, b []T) bool {
 	}
 	return true
 }
+
+// Permutations get all permutations of a string
+func Permutations(str string) []string {
+	if len(str) == 0 {
+		return []string{""}
+	}
+
+	var result []string
+	for i, char := range str {
+		remaining := str[:i] + str[i+1:]
+		for _, perm := range Permutations(remaining) {
+			result = append(result, string(char)+perm)
+		}
+	}
+	return result
+}
