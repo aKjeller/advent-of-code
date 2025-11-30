@@ -104,6 +104,18 @@ func ToGrid(path string) (m [][]uint8) {
 	return m
 }
 
+func ToIntGrid(path string) (m [][]int) {
+	input := ToStringSlice(path)
+	for i := range input {
+		var row []int
+		for j := range len(input[i]) {
+			row = append(row, int(input[i][j]-'0'))
+		}
+		m = append(m, row)
+	}
+	return m
+}
+
 func ToString(path string) string {
 	b, err := os.ReadFile(path)
 	if err != nil {
