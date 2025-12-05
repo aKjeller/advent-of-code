@@ -44,55 +44,38 @@ func part1(path string) {
 	fmt.Println("part1: ", sum)
 }
 
-type item struct {
-	id      int
-	isStart bool
-}
-
 func part2(path string) {
 	input := util.ToStringSlice(path)
 
-	var items []item
+	var ranges []interval
 	for _, r := range input {
 		if r == "" {
 			break
 		}
 		parts := strings.Split(r, "-")
-		items = append(items, item{util.ParseInt(parts[0]), true})
-		items = append(items, item{util.ParseInt(parts[1]), false})
+		ranges = append(ranges, interval{util.ParseInt(parts[0]), util.ParseInt(parts[1])})
 	}
 
-	sort.Slice(items, func(i, j int) bool {
-		if items[i].id != items[j].id {
-			return items[i].id < items[j].id
-		}
-		return items[i].isStart && !items[j].isStart
+	sort.Slice(ranges, func(i, j int) bool {
+		return ranges[i].start < ranges[j].start
 	})
 
-	var sum, c, prevC, i int
-	for _, item := range items {
-		if item.isStart {
-			c += 1
-		} else {
-			c -= 1
+	sum, start, end := 0, ranges[0].start, ranges[0].end
+	for _, item := range ranges {
+		if item.start > end {
+			sum += end - start + 1
+			start = item.start
 		}
-
-		if c > 0 && prevC == 0 {
-			i = item.id
-		}
-		if c == 0 && prevC > 0 {
-			sum += item.id - i + 1
-		}
-
-		prevC = c
+		end = max(end, item.end)
 	}
+	sum += end - start + 1
 
 	fmt.Println("part2: ", sum)
 }
 
 func main() {
-	part1(util.ExamplePath(YEAR, DAY))
+	// part1(util.ExamplePath(YEAR, DAY))
 	part1(util.InputPath(YEAR, DAY))
-	part2(util.ExamplePath(YEAR, DAY))
+	// part2(util.ExamplePath(YEAR, DAY))
 	part2(util.InputPath(YEAR, DAY))
 }
