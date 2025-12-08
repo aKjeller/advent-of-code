@@ -1,13 +1,14 @@
 package main
 
 import (
+	"container/heap"
 	"fmt"
-	"math"
+	"maps"
 	"slices"
-	"sort"
 	"strings"
 
 	util "github.com/aKjeller/advent-of-code/utilities/go"
+	"github.com/aKjeller/advent-of-code/utilities/go/ds"
 )
 
 const YEAR = "25"
@@ -15,163 +16,85 @@ const DAY = "08"
 
 type box struct {
 	x, y, z int
-	edges   []*box
+	index   int
 }
 
-func (b box) String() string {
-	return fmt.Sprintf("[%d %d %d]", b.x, b.y, b.z)
-
-}
-
-func (b box) distance(other box) float64 {
-	dx := float64(b.x - other.x)
-	dy := float64(b.y - other.y)
-	dz := float64(b.z - other.z)
-	return math.Sqrt(dx*dx + dy*dy + dz*dz)
+func (b box) distance(other box) int {
+	dx := b.x - other.x
+	dy := b.y - other.y
+	dz := b.z - other.z
+	return dx*dx + dy*dy + dz*dz
 }
 
 type edge struct {
-	a, b     *box
-	distance float64
+	src, dst box
 }
 
-func part1(path string) {
-	input := util.ToStringSlice(path)
+func part1(path string, n int) {
+	dsu, _, edges := parse(path)
 
-	var boxes []*box
-	var networks [][]*box
-	for _, line := range input {
-		parts := strings.Split(line, ",")
-		b := box{util.ParseInt(parts[0]), util.ParseInt(parts[1]), util.ParseInt(parts[2]), []*box{}}
-		boxes = append(boxes, &b)
-		networks = append(networks, []*box{&b})
+	for range n {
+		edge := heap.Pop(edges).(ds.Item[edge]).Value
+		dsu.Union(edge.src.index, edge.dst.index)
 	}
 
-	for range 1000 {
-		var edges []edge
-		for i := range boxes {
-			for j := range boxes {
-				boxA := boxes[i]
-				boxB := boxes[j]
-				if boxA == boxB {
-					continue
-				}
-				if slices.Contains(boxA.edges, boxB) {
-					continue
-				}
-				edges = append(edges, edge{boxA, boxB, boxA.distance(*boxB)})
-			}
-		}
-		if len(edges) == 0 || len(networks) == 1 {
-			break
-		}
-		edge := edges[0]
-		for _, e := range edges {
-			if e.distance < edge.distance {
-				edge = e
-			}
-		}
-
-		edge.a.edges = append(edge.a.edges, edge.b)
-		edge.b.edges = append(edge.b.edges, edge.a)
-
-		a, b := -1, -1
-		for i, network := range networks {
-			if slices.Contains(network, edge.a) {
-				a = i
-			}
-			if slices.Contains(network, edge.b) {
-				b = i
-			}
-		}
-		if a == b {
-			continue
-		}
-		if a > -1 && b > -1 {
-			networks[a] = append(networks[a], networks[b]...)
-			networks = util.RemoveElement(networks, b)
-		}
+	circuits := make(map[int]int)
+	for _, union := range *dsu {
+		circuits[dsu.Find(union.Parent)] += 1
 	}
 
-	sort.Slice(networks, func(i, j int) bool {
-		return len(networks[i]) > len(networks[j])
-	})
+	values := slices.Sorted(maps.Values(circuits))
+	slices.Reverse(values)
 
-	res := 0
-	if len(networks) >= 3 {
-		res = len(networks[0]) * len(networks[1]) * len(networks[2])
-	}
+	res := values[0] * values[1] * values[2]
+
 	fmt.Println("part1: ", res)
 }
 
 func part2(path string) {
-	input := util.ToStringSlice(path)
-
-	var boxes []*box
-	var networks [][]*box
-	for _, line := range input {
-		parts := strings.Split(line, ",")
-		b := box{util.ParseInt(parts[0]), util.ParseInt(parts[1]), util.ParseInt(parts[2]), []*box{}}
-		boxes = append(boxes, &b)
-		networks = append(networks, []*box{&b})
-	}
+	dsu, boxes, edges := parse(path)
 
 	var last edge
-	for {
-		var edges []edge
-		for i := range boxes {
-			for j := range boxes {
-				boxA := boxes[i]
-				boxB := boxes[j]
-				if boxA == boxB {
-					continue
-				}
-				if slices.Contains(boxA.edges, boxB) {
-					continue
-				}
-				edges = append(edges, edge{boxA, boxB, boxA.distance(*boxB)})
-			}
-		}
-		if len(edges) == 0 || len(networks) == 1 {
-			break
-		}
-		edge := edges[0]
-		for _, e := range edges {
-			if e.distance < edge.distance {
-				edge = e
-			}
-		}
-
-		last = edge
-
-		edge.a.edges = append(edge.a.edges, edge.b)
-		edge.b.edges = append(edge.b.edges, edge.a)
-
-		a, b := -1, -1
-		for i, network := range networks {
-			if slices.Contains(network, edge.a) {
-				a = i
-			}
-			if slices.Contains(network, edge.b) {
-				b = i
-			}
-		}
-		if a == b {
-			continue
-		}
-		if a > -1 && b > -1 {
-			networks[a] = append(networks[a], networks[b]...)
-			networks = util.RemoveElement(networks, b)
+	c, target := 0, len(boxes)-1
+	for c < target {
+		edge := heap.Pop(edges).(ds.Item[edge]).Value
+		if dsu.Union(edge.src.index, edge.dst.index) {
+			last = edge
+			c++
 		}
 	}
 
-	res := last.a.x * last.b.x
+	res := last.src.x * last.dst.x
+
 	fmt.Println("part2: ", res)
 }
 
+func parse(path string) (*ds.Dsu, []box, *ds.PriorityQueue[edge]) {
+	input := util.ToStringSlice(path)
+
+	var dsu ds.Dsu
+	var boxes []box
+	for _, line := range input {
+		parts := strings.Split(line, ",")
+		index := dsu.Add()
+		box := box{util.ParseInt(parts[0]), util.ParseInt(parts[1]), util.ParseInt(parts[2]), index}
+		boxes = append(boxes, box)
+	}
+
+	edges := &ds.PriorityQueue[edge]{}
+	heap.Init(edges)
+	for i := range boxes {
+		for j := i + 1; j < len(input); j++ {
+			heap.Push(edges, ds.Item[edge]{Value: edge{boxes[i], boxes[j]}, Priority: boxes[i].distance(boxes[j])})
+		}
+	}
+
+	return &dsu, boxes, edges
+}
+
 func main() {
-	// part1(util.ExamplePath(YEAR, DAY))
-	part1(util.InputPath(YEAR, DAY))
+	// part1(util.ExamplePath(YEAR, DAY), 10)
+	part1(util.InputPath(YEAR, DAY), 1000)
 	// part2(util.ExamplePath(YEAR, DAY))
 	part2(util.InputPath(YEAR, DAY))
 }
