@@ -30,14 +30,34 @@ type edge struct {
 	src, dst box
 }
 
-func part1(path string, n int) {
-	dsu, _, edges := parse(path)
+func both(path string, n int) {
+	dsu, boxes, edges := parse(path)
 
-	for range n {
+	var last edge
+	var c1, c2, part1 int
+	target := len(boxes) - 1
+
+	for c2 < target {
 		edge := heap.Pop(edges).(ds.Item[edge]).Value
-		dsu.Union(edge.src.index, edge.dst.index)
+
+		if dsu.Union(edge.src.index, edge.dst.index) {
+			last = edge
+			c2++
+		}
+
+		if c1 == n-1 {
+			part1 = getPart1(dsu)
+		}
+		c1++
 	}
 
+	part2 := last.src.x * last.dst.x
+
+	fmt.Println("part1: ", part1)
+	fmt.Println("part2: ", part2)
+}
+
+func getPart1(dsu *ds.Dsu) int {
 	circuits := make(map[int]int)
 	for _, union := range *dsu {
 		circuits[dsu.Find(union.Parent)] += 1
@@ -46,27 +66,7 @@ func part1(path string, n int) {
 	values := slices.Sorted(maps.Values(circuits))
 	slices.Reverse(values)
 
-	res := values[0] * values[1] * values[2]
-
-	fmt.Println("part1: ", res)
-}
-
-func part2(path string) {
-	dsu, boxes, edges := parse(path)
-
-	var last edge
-	c, target := 0, len(boxes)-1
-	for c < target {
-		edge := heap.Pop(edges).(ds.Item[edge]).Value
-		if dsu.Union(edge.src.index, edge.dst.index) {
-			last = edge
-			c++
-		}
-	}
-
-	res := last.src.x * last.dst.x
-
-	fmt.Println("part2: ", res)
+	return values[0] * values[1] * values[2]
 }
 
 func parse(path string) (*ds.Dsu, []box, *ds.PriorityQueue[edge]) {
@@ -93,8 +93,6 @@ func parse(path string) (*ds.Dsu, []box, *ds.PriorityQueue[edge]) {
 }
 
 func main() {
-	// part1(util.ExamplePath(YEAR, DAY), 10)
-	part1(util.InputPath(YEAR, DAY), 1000)
-	// part2(util.ExamplePath(YEAR, DAY))
-	part2(util.InputPath(YEAR, DAY))
+	// both(util.ExamplePath(YEAR, DAY), 10)
+	both(util.InputPath(YEAR, DAY), 1000)
 }
